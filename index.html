@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Rotate & Flip Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .video-container {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 100%;
+            max-height: 70vh;
+        }
+        .canvas-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: #111;
+            border-radius: 8px;
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col items-center py-10 px-4">
+
+    <div class="max-w-4xl w-full space-y-6">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold tracking-tight text-white">Video Rotator</h1>
+            <p class="text-slate-400 mt-2">Upload a video and adjust its orientation easily.</p>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="flex items-center justify-center w-full">
+            <label for="video-upload" class="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-700 border-dashed rounded-lg cursor-pointer bg-slate-800 hover:bg-slate-700 transition-colors">
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <svg class="w-8 h-8 mb-4 text-slate-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                    </svg>
+                    <p class="mb-2 text-sm text-slate-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                    <p class="text-xs text-slate-500">MP4, WebM or Ogg</p>
+                </div>
+                <input id="video-upload" type="file" class="hidden" accept="video/*" />
+            </label>
+        </div>
+
+        <!-- Video Player -->
+        <div class="canvas-wrapper shadow-2xl relative">
+            <video id="video-player" controls class="video-container" src="https://www.w3schools.com/html/mov_bbb.mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Controls -->
+        <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <button onclick="rotate(-90)" class="flex flex-col items-center justify-center p-3 bg-slate-700 hover:bg-blue-600 rounded-lg transition-all">
+                <span class="text-xs uppercase font-bold text-slate-400 mb-1">Rotate</span>
+                <span class="text-xl">↺ 90°</span>
+            </button>
+            <button onclick="rotate(90)" class="flex flex-col items-center justify-center p-3 bg-slate-700 hover:bg-blue-600 rounded-lg transition-all">
+                <span class="text-xs uppercase font-bold text-slate-400 mb-1">Rotate</span>
+                <span class="text-xl">↻ 90°</span>
+            </button>
+            <button onclick="flip('H')" class="flex flex-col items-center justify-center p-3 bg-slate-700 hover:bg-emerald-600 rounded-lg transition-all">
+                <span class="text-xs uppercase font-bold text-slate-400 mb-1">Mirror</span>
+                <span class="text-xl">⇄ Horizontal</span>
+            </button>
+            <button onclick="flip('V')" class="flex flex-col items-center justify-center p-3 bg-slate-700 hover:bg-emerald-600 rounded-lg transition-all">
+                <span class="text-xs uppercase font-bold text-slate-400 mb-1">Mirror</span>
+                <span class="text-xl">⇅ Vertical</span>
+            </button>
+        </div>
+
+        <div class="flex justify-center">
+            <button onclick="resetTransform()" class="px-6 py-2 bg-rose-600 hover:bg-rose-500 rounded-full font-medium transition-colors">
+                Reset All Changes
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video-player');
+        const uploadInput = document.getElementById('video-upload');
+        
+        let rotation = 0;
+        let scaleX = 1;
+        let scaleY = 1;
+
+        // Handle File Upload
+        uploadInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+                resetTransform();
+            }
+        });
+
+        function applyStyles() {
+            video.style.transform = `rotate(${rotation}deg) scaleX(${scaleX}) scaleY(${scaleY})`;
+            
+            // Adjust scaling to prevent clipping on 90/270 rotations
+            const isVertical = (rotation / 90) % 2 !== 0;
+            if (isVertical) {
+                // Approximate scale to fit within container height when rotated
+                // In a real app, you'd calculate based on aspect ratio
+                video.style.maxWidth = '70vh';
+            } else {
+                video.style.maxWidth = '100%';
+            }
+        }
+
+        function rotate(deg) {
+            rotation += deg;
+            applyStyles();
+        }
+
+        function flip(axis) {
+            if (axis === 'H') scaleX = scaleX === 1 ? -1 : 1;
+            if (axis === 'V') scaleY = scaleY === 1 ? -1 : 1;
+            applyStyles();
+        }
+
+        function resetTransform() {
+            rotation = 0;
+            scaleX = 1;
+            scaleY = 1;
+            applyStyles();
+        }
+    </script>
+</body>
+</html>
